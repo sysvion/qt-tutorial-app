@@ -3,3 +3,4 @@ build/
 install/
 venv/
 .vscode/
+**.pyc

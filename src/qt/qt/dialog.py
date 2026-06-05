@@ -32,7 +32,21 @@ class Dialog(QWidget):
         mainLayout.addLayout(buttonsLayout)
 
         self.setLayout(mainLayout)
+        self.update_buttons_styles()
 
+
+
+    def update_buttons_styles(self):
+        self.slideWidgets.isActiveWindow()
+        if (self.slideWidgets.currentIndex() >= self.slideWidgets.count() - 1):
+            self.nextBtn.setStyleSheet("background: #f00;")
+        else:
+            self.nextBtn.setStyleSheet("")
+
+        if (self.slideWidgets.currentIndex() == 0):
+            self.prevBtn.setStyleSheet("background: #f00;")
+        else:
+            self.prevBtn.setStyleSheet("")
 
 
     def nextSlide(self):
@@ -40,6 +54,7 @@ class Dialog(QWidget):
             return
         
         self.slideWidgets.setCurrentIndex(self.slideWidgets.currentIndex()+1)
+        self.update_buttons_styles()
         
  
 
@@ -48,4 +63,6 @@ class Dialog(QWidget):
             return
         
         self.slideWidgets.setCurrentIndex(self.slideWidgets.currentIndex()-1)
+        self.update_buttons_styles()
+
 

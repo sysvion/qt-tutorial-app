@@ -1,6 +1,8 @@
 from .ui_course_card import Ui_Form as Ui_Course_Card_Form
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QTextBrowser, QPushButton
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QTextBrowser, QPushButton, QLabel
+
+
 
 from .followCamCourse import FolowHandMeta
 
@@ -19,7 +21,7 @@ class CourseSelectorModel(QWidget):
             card = course_card(
                 course.get_course_title(),
                 course.get_course_description(),
-                lambda _ : interface.set_content(course.get_course_widget())
+                lambda _ : interface.set_content(course.get_course_widget(interface))
             )
             self.layout.addWidget(card)
 

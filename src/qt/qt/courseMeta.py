@@ -11,5 +11,5 @@ class CourseMeta:
     def get_course_description() -> str:
         raise NotImplemented()
     
-    def get_course_widget() -> QWidget:
+    def get_course_widget(application) -> QWidget:
         raise NotImplemented()

@@ -1,8 +1,14 @@
 from .courseMeta import CourseMeta
-from PySide6.QtWidgets import QTextBrowser, QVBoxLayout
+from PySide6.QtWidgets import QTextBrowser, QVBoxLayout, QLabel, QScrollArea, QHBoxLayout, QComboBox
+from PySide6.QtGui import QPixmap, QImage
+from sensor_msgs.msg import CompressedImage
+from PySide6.QtCore import Qt, QByteArray, QTimer
 from .dialog import Dialog
 #from .application import MainWindow
+
 from typing import List, Tuple
+from rclpy import subscription
+from rclpy.node import Node
 
 class FolowHandMeta(CourseMeta):
 
@@ -12,25 +18,18 @@ class FolowHandMeta(CourseMeta):
     def get_course_description(self):
         return "Learn the basics of ros2 by following a hand"
     
-    def get_course_widget(self, app): # app will be an instance of Main window but i can't import it. Thanks python
+    def get_course_widget(self, app): # app will be an instance of Main window but i can't import it. Thanks python            
 
-        topic: Tuple[str, List[str]]
-        for topic in app.get_topic_names_and_types():
-            print("topic: ", topic[0])
-            for type in topic[1]:
-                print(type)
-            print()
-            
-
-        return course()
+        return course(app)
     
 
 class course(Dialog):
 
 
-
-
-    def __init__(self, parent=None):
+    app: Node
+    camara_subscription: subscription = None
+    def __init__(self, app,  parent=None):
+        self.app = app
 
         # main
         introduction = QVBoxLayout()
@@ -55,9 +54,12 @@ class course(Dialog):
         introduction.addWidget(browser)
 
 
-        package = QVBoxLayout()
+        package_widget = QScrollArea()
+        package_widget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        layout = QVBoxLayout()
 
         browser2 = QTextBrowser()
+        
         browser2.setHtml("""
                         <h1> Creating your first package </h1>
                          
@@ -127,26 +129,95 @@ $ source /opt/ros/jazzy/setup.bash
                         </code>
                         </blockquote>
                         """)
-    
-        package.addWidget(browser2)
 
-        publisher = QVBoxLayout()
-        browser3 = QTextBrowser()
-#        browser3.setHtml("""
         
-#""")
-        package.addWidget(browser3)
+       
+        layout.addWidget(browser2)
+        
+        package_widget.setLayout(layout)
+        package_layout = QVBoxLayout()
+        package_layout.addWidget(package_widget)
+
+
+        publisher_previewer = QVBoxLayout()
+        # browser3 = QTextBrowser()
+        # browser3.setHtml
+        # ("""
+        #                 <h1>First ros2 node</h1>
+        #                 Now that you have a method to run code in the ros2 enviroment.
+        # 
+        #                  """)
+        # publisher.addWidget(browser3)
+ 
+        self.topic_selector = QComboBox()
+
+        self.topic_selector.currentTextChanged.connect(self.changeCamaraSubscription)
+        
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_camara_options)
+        self.timer.start(1000) #ms
+        
+       
+        
+
+        self.camara_viewer = QLabel()
+        publisher_previewer.addWidget(self.topic_selector)
+        publisher_previewer.addWidget(self.camara_viewer)
+
 
         reciever = QVBoxLayout()
 
-
-
-        
         slides = [
             introduction,
-            package,
-            publisher
+            package_layout,
+            publisher_previewer
         ]
         super().__init__(slides,parent=parent)
+
+
+    def update_camara_options(self):
+        current = self.topic_selector.currentText()
+        self.topic_selector.clear()
+
+        topic: Tuple[str, List[str]]
+        for topic in self.app.get_topic_names_and_types():
+            for type in topic[1]:
+                if (type == "sensor_msgs/msg/CompressedImage"):
+                    self.topic_selector.addItem(topic[0])
+
+                    if topic[0] == current:
+                        self.topic_selector.setCurrentText(topic[0])
+
+
+    def changeCamaraSubscription(self, topic):
+        print("on change")
+        print(topic)
+        if self.camara_subscription is not None:
+            res = self.app.destroy_subscription(self.camara_subscription)
+            self.camara_subscription = None
+
+        if topic == "":
+            return
+            
+
+        self.camara_subscription = self.app.create_subscription(
+            CompressedImage,
+            topic,
+            self.camara_callback,
+            1
+        )
+        
+
+    def camara_callback(self, msg: CompressedImage):
+        img = QImage.fromData(
+                QByteArray(bytes(msg.data)),
+                msg.format
+        )
+        self.camara_viewer.setPixmap(
+            QPixmap(img)
+        )
+
+        
+
 
 

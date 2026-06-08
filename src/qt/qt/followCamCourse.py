@@ -38,6 +38,7 @@ class course(Dialog):
         browser = QTextBrowser()
 
         browser.setHtml("""
+                        <h1>Preamble 1: contents </h1>
                         
                         Ros2 is a system that facilitate the interchange of messages between large commurtial projects and your application 
                         Where it is posable to proof that the program always reacts the same way regartless of the input. Ros also allows for interchanging 
@@ -62,7 +63,7 @@ class course(Dialog):
         browser2 = QTextBrowser()
         
         browser2.setHtml("""
-                        <h1>chapter 1: workspace</h1>
+                        <h1> Preamble 2: workspace </h1>
 
                         Ros2 projects are structured in packages that can easily be stored in a version control system like Git or Mercurial. And there is
                         a build system that build all project in the correct order. The place where you store the packages are dependend on which build system used. Here i explain
@@ -110,8 +111,8 @@ $ source /opt/ros/jazzy/setup.bash
                          
                         <blockquote>
                         <code>
-<span style="color:gray;">practicum@practicum-ubuntu:~/tutorial_ws</span>$ cd src/ <br>
-<span style="color:gray;">practicum@practicum-ubuntu:~/tutorial_ws/src</span>$ ros2 pkg create --build-type ament_python --node-name main follow_hand
+<span style="color:gray;">practicum@practicum-ubuntu:~/Desktop/tutorial_ws</span>$ cd src/ <br>
+<span style="color:gray;">practicum@practicum-ubuntu:~/Desktop/tutorial_ws/src</span>$ ros2 pkg create --build-type ament_python --node-name main follow_hand
                         </code>
                         </blockquote>
 
@@ -138,7 +139,7 @@ $ source /opt/ros/jazzy/setup.bash
         publisher = QVBoxLayout()
         browser3 = QTextBrowser()
         browser3.setHtml("""
-                       <h1>chapter 2: publisher</h1>
+                       <h1>chapter 1: publisher</h1>
                         Now you know how to properly create and run code within the ros environment it is time to interact with other systems that uses ros.
                         On the next slide you will find a image previewer which gets updated every time it receives a message. Your job is to publish a camara feed so it could pick it up. 
                         Later we use video stream to detect a object so a robot moves relative to it.
@@ -227,15 +228,14 @@ if __name__ == '__main__':
         reciever = QVBoxLayout()
         browser4 = QTextBrowser()
         browser4.setHtml("""
-                         <h1>chapter 3: Executor</h1>
-                         In this chapter you learn how to recieve mesages that is send through ros. To do that you need a executor. In this chaptor you will
-                         learn how the executor works. And translate the image to a target in 3d space.
-                          
-                         <h3>reciever</h3>
-                         If you want to recieve messages you need to register them to a node just like you did as a reciever. Call <code>Node.create_subscription()</code> and give the same type of parameters as create_publisher. But you also need to give a 
-                         callback function that has one parameter which will get the message. The create_subscription() will register this to the node so that the spun executor can fetch the messages and call the function. <br>
+                         <h1>chapter 2: Executor</h1>
+                         In this chapter, you learn how to receive messages that are sent through ros. To do that, you need a executor.  And for the follow the object example. You will translate an image to a 3d coordinate. 
+ 
+                         <h3>Subscriping to a topic</h3>
+                         If you want to receive messages, you need to register them to a node just like you did as a receiver. Call <code>Node.create_subscription()</code> and give the same type of parameters as create_publisher. But you also need to give a 
+                         callback function that has one  parameter, the received message. The create_subscription() will register this to the node so that the spun executor can fetch the messages and call the function. <br>
                          <br>
-                         <b>create a new node that contains a Pose publisher and reciever for the images</b>
+                         <b>create a new node that contains a subscripter for the images of your camara. Also create  a Pose publisher. Here is some starting code </b>
                          <code>
                          <pre>
 from geometry_msgs.msg import Pose
@@ -269,23 +269,26 @@ class recv(Node):
         # A Quaternion rotation
         response.pose.orientation.w = 1.0
         
-        response.position.x = # please calculate a 
-        response.position.y = # safe place
-        response.position.z = # and set the robot speed to a minimum
+        # please calculate a coordinate to a safe place. Please not to a wall. 0, 0, 0, is the base of the robot. Mesuremnts <i>should</i> be meters. 
+        response.position.x = 0.5 
+        response.position.y = 0.5
+        response.position.z = 0.5
 
         self.pose_pub.publish(response)
                          
                          </pre>
                          </code>
 
-                         <br>                 
+                         As you may or may not noiticed there is no funcution to manually fetch data. To do actualy run the code you must spin the node. By spinning a note means running the job scueduler for it. The instance of the loop is colloquially called the <a href="https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Executors.html"><code>executor</code></a>. The executor goes though the following dession tree and calls the correct callback function    
+
                          The executor is a first in first out scheduler which runs your callbacks. With the order of execution: <br>
                          <img width="800" src="file://home/practicum/Downloads/executors_scheduling_semantics.png">
                         
-                         You spin a executer like so:
+                         There are a lot of ways to spin a node. There is the default that continualy runs (spin). There is a run once (spin_once). Spin until something compleats (spin_until_future_complete). All of those can also accept the executor parameter which chanches the method of execution (sigle or multithreading). Or which algorithom it using. (Sill use the table that you see above).<br>
+                         
+                         Example of spinning a signle node
                          <code>
                          <pre>
-        
 def main():
     rclpy.init()
     node = reciever()
@@ -295,8 +298,48 @@ def main():
     rclpy.shutdown()
                         </pre>
                         <code>
-""")
+                        """)
+        browser4.setOpenExternalLinks(True)
+
         reciever.addWidget(browser4)
+
+        moveit = QVBoxLayout()
+        browser5 = QTextBrowser()
+        browser5.setHtml("""
+                        <h1>moveit</h1>
+                         ToDo. In person. code not tested.
+
+                         <code>
+                         <pre>
+rclpy.init()
+
+moveit_instance = None # I will the way to create this in person
+
+my_node = Node('sub')
+from geometry_msgs.msg import Pose, PoseStamped
+planner = moveit_instance.get_planning_component("manipulator") # or ur_manipulator
+
+def on_recieve(msg: Pose):
+    pose_goal = PoseStamped()
+    pose_goal.pose = msg
+    pose_goal.header.frame_id = "tool" 
+    planner.set_goal_state(pose_stamped_msg=pose_goal, pose_link="tool")
+    plan_result = planner.plan()
+    robot_trajectory = plan_result.trajectory
+    moveit_instance.execute(robot_trajectory, controllers=[])    
+                         
+s = my_node.create_subscription(
+    Pose,
+    #name,
+    self.on_recieve,
+    QoSPresetProfiles.DEFAULT,
+)
+
+rclpy.spin(my_node)
+                         </pre>
+                         </code>
+                         """)
+        moveit.addWidget(browser5)
 
 
 
@@ -305,7 +348,8 @@ def main():
             package_layout,
             publisher,
             publisher_previewer,
-            reciever
+            reciever,
+            moveit
         ]
         super().__init__(slides,parent=parent)
 

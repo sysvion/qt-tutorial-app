@@ -4,6 +4,7 @@ from PySide6.QtGui import QPixmap, QImage
 from sensor_msgs.msg import CompressedImage
 from PySide6.QtCore import Qt, QByteArray, QTimer
 from .dialog import Dialog
+
 #from .application import MainWindow
 
 from typing import List, Tuple
@@ -61,47 +62,43 @@ class course(Dialog):
         browser2 = QTextBrowser()
         
         browser2.setHtml("""
-                        <h1> Creating your first package </h1>
-                         
-                        Ros2 project are strucured in a packages that can easaly be stored in a version control system like git or mercurial. And there is
+                        <h1>chapter 1: workspace</h1>
+
+                        Ros2 projects are structured in packages that can easily be stored in a version control system like Git or Mercurial. And there is
                         a build system that build all project in the correct order. The place where you store the packages are dependend on which build system used. Here i explain
-                        <code>colcon</code>. a teminal command. 
+                        <code>colcon</code>. a terminal command. 
                          
                          <h3>Creating a workspace</h3>
-                         A colcon workspace is just a diractory which has the following content:
+                         A colcon workspace is just a directory that has the following content:
                          <pre>
 +--+ src/
-|  +-- your_package
-|  +-- vendor package
+|     source code that can be entirely be in a version control system
 |
 +--+ install/
+|  |  A directory of generated content to link build programs where the setup.bash is the most important file.
 |  + -- setup.bash
+|          script that need to be sourced to run the code
 |
 +-- build
-|     build artifects. You can ignore what the contents of this dirac
+|     build artifacts. You may need to remove this.
 
 +-- log
-|
+|   Build logs
                          </pre>
 
-                         To create a package from schrech you just need to create a src diractory where it is fine to be cluttert with the diractories above. It is also customary to
-                         give the diractory where src is the "_WS" suffix simbolising that this is a colcon workspace.
+                         To create a package from scratch, you just need to create a src directory where it is fine to be cluttered with the directories listed above. It is also customary to
+                         give the directory where src is the "_ws" suffix, symbolizing that this is a colcon workspace.
 
-                         <details>
-                         <summary>
-                         test
-                         </summary>
-                         Open the terminal.
+                         <blockquote>
+                         <code>
+$ mkdir -p ~/ Desktop/tutorial_ws/src
+                         </code>
+                         </blockquote>
 
-                         type
-                         </details>
 
-                         <h3> create a package </h3>
-                         A package is at minimum python or c++ source code and a manifest file that explains how to load dependacies and how to build the executable.
-                         Luckaly you don't neet to write all the configuration by hand. Ros has a cli tool that creates the files for you. It only asks about which programming 
                          language you want to use. And what the package should be called.<br>
                          <br>
-                         But first you neet a way to call Ros2. To do that you need to source the ros2 setup file. sourceing a script is like running the commends directly on your shell.
+                         But first you need a way to call ros2. To do that you need to source the ros2 setup file. Sourcing a script is like running the commands directly on your shell. Like running cd. And changing environment variables. You can also do this automatically by adding it to the .bashrc file.
                          
                          <blockquote>
                          <code>
@@ -109,7 +106,7 @@ $ source /opt/ros/jazzy/setup.bash
                          </code>
                          </blockquote>
 
-                        You can use the <code>ros2 pkg create</code> to create the framework. You can pas the <code>--help</code> flag to see all available options. For the tutorial i will assume you have a python project with the node scafaultng that is given bu the following command(s)
+                        You can use the <code>ros2 pkg create</code> to create the framework. You can pass the <code>--help</code> flag to see all available options. For the tutorial, I will assume you have a python project with the node scaffolding that is given by the following command(s)
                          
                         <blockquote>
                         <code>
@@ -118,14 +115,14 @@ $ source /opt/ros/jazzy/setup.bash
                         </code>
                         </blockquote>
 
-                        With this command you have 3 parts build files (<code>package.xml</code><code>setup.cfg</code> and <code>setup.py</code>). A diractory where automated tests can be written. And a diractory with the same name as the package.
-                        Here in lives lives the sources of the program. There in is main.py. (Or what you have writen after --node-name.) Here is a entry point of your program. To run the created hallo world program you need to build it. Herefore you need to be at the root of the workspace and ros must be sourced. And run `colcon build`. When that is done. You can run your program using `ros2 run follow_hand main`
+                        With this command you get 3. One part is build files (<code>package.xml</code><code>setup.cfg</code> and <code>setup.py</code>). And another one is a directory where automated tests can be written. And a directory with the same name as the package.
+                        Herein lives the source of the program. There is main.py. (Or what you have written after --node-name.) Here is an entry point of your program currently containing a Hello world program. To run the created program you need to build it. Therefore, you need to be at the root of the workspace and ros must be sourced. And run `colcon build`. When that is done. You can run your program using `ros2 run follow_hand main`
                         <blockquote>
                         <code>
  <br>
-<span style="color:gray;">practicum@practicum-ubuntu:~/tutorial_ws/src</span>$ cd ..
+<span style="color:gray;">practicum@practicum-ubuntu:~/Desktop/tutorial_ws/src</span>$ cd ..
 
-<span style="color:gray;">practicum@practicum-ubuntu:~/tutorial_ws</span>$ colcon build --symlink-install
+<span style="color:gray;">practicum@practicum-ubuntu:~/Desktop/tutorial_ws</span>$ colcon build --symlink-install
                         </code>
                         </blockquote>
                         """)
@@ -138,27 +135,89 @@ $ source /opt/ros/jazzy/setup.bash
         package_layout = QVBoxLayout()
         package_layout.addWidget(package_widget)
 
+        publisher = QVBoxLayout()
+        browser3 = QTextBrowser()
+        browser3.setHtml("""
+                       <h1>chapter 2: publisher</h1>
+                        Now you know how to properly create and run code within the ros environment it is time to interact with other systems that uses ros.
+                        On the next slide you will find a image previewer which gets updated every time it receives a message. Your job is to publish a camara feed so it could pick it up. 
+                        Later we use video stream to detect a object so a robot moves relative to it.
+
+                        <h3> Nodes </h3> 
+                        Nodes are the cornerstone of the ros ecosystem. It is a python and c++ class that handles communication and timing of everything that happens in ros. You need to register everything that you transmit. And
+                        for recieving you need to tell which function to call. It is best practice to give a node a single purpose. To create a node create a class that extends Node from rclpy (or rclcpp for c++ projects). And call the parent constructor to it give a name.
+                        
+                        <code>
+                        <pre>
+from rclpy.node import Node
+
+class camara_publisher(Node):
+    def __init__(self):
+        super().__init__("my_webcam")
+                         </pre>
+                        </code>
+                        
+                        To create a publisher you need to call the <code>Node.create_publisher</code> function and store the return value so it doesn't get destroyed. The parameters you need to pass is the message type. Topic name (the address where the message is published.) And <a href="https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Quality-of-Service-Settings.html">Quality of Service settings</a> (later referred to as QoS). <br>
+                         
+  <br>
+Everything that has been sent through a publisher will be stored for some time. The QoS settings also dictate how much will be stored. But because there is a lot of options that need to be set. There are convenient presents that can be used which contain the following:
+
+< TODO fill the presets in from the qos documentation >
+                         <br>
+                         <br>
+                         You can publish only datatype per publisher. But the structure can contain a lot. Arrays, numbers, chars. Every datastructure is defined by a msg files. And there is a lot of sets of standard messages. geometric data from geometry_msgs. sensor data from sensor_msgs. And msg that only contain primitives (std_msgs).<br> 
+
+                         <code>
+                         <pre>
+from sensor_msgs.msg import CompressedImage
+from rclpy.qos import QoSPresetProfiles
+                         
+class camara_publisher(Node):
+    def __init__(self):
+        super().__init__("my_webcam")
+        self.camara_pub = self.create_publisher(
+                CompressedImage,
+                "/my/camera",
+                QoSPresetProfiles.SYSTEM_DEFAULT.value,
+                )
+                         </pre>
+                        </code>
+                         
+                        <h3> publishing the first messages </h3>
+                        To publish a message you first need a ros running and creating a instance of the node. This should be in the main function. 
+                         
+                         <code>
+                         <pre>
+import rclpy
+def main():
+    rclpy.init()
+    node = camara_publisher()
+    
+    // code
+
+    rclpy.shutdown()
+        
+if __name__ == '__main__':
+    main()                
+                         </pre>
+                         </code>
+                         
+                        You can publish msg by calling publish(msg=msg) on the poblisher what you have stored somewhere. On the code example given it is node.camara_pub.publish(msg=msg). But first you need to make a message. You can do it by constructing the class and filling in its parameters. But for standard messages there are ways to translate it from known structures like opencv to ros2 msg with a project like cv_bridge. 
+                        For a vm you need to pastrough the camara to it. For VirtualBox the setting can be find in the Devices tab. <br>
+                        <br>
+                        In the next tab you will see all listed compressedImages Topic and a previewer.                   
+                        """)
+        browser3.setOpenExternalLinks(True)
+        publisher.addWidget(browser3)
 
         publisher_previewer = QVBoxLayout()
-        # browser3 = QTextBrowser()
-        # browser3.setHtml
-        # ("""
-        #                 <h1>First ros2 node</h1>
-        #                 Now that you have a method to run code in the ros2 enviroment.
-        # 
-        #                  """)
-        # publisher.addWidget(browser3)
  
         self.topic_selector = QComboBox()
-
         self.topic_selector.currentTextChanged.connect(self.changeCamaraSubscription)
         
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_camara_options)
         self.timer.start(1000) #ms
-        
-       
-        
 
         self.camara_viewer = QLabel()
         publisher_previewer.addWidget(self.topic_selector)
@@ -166,11 +225,87 @@ $ source /opt/ros/jazzy/setup.bash
 
 
         reciever = QVBoxLayout()
+        browser4 = QTextBrowser()
+        browser4.setHtml("""
+                         <h1>chapter 3: Executor</h1>
+                         In this chapter you learn how to recieve mesages that is send through ros. To do that you need a executor. In this chaptor you will
+                         learn how the executor works. And translate the image to a target in 3d space.
+                          
+                         <h3>reciever</h3>
+                         If you want to recieve messages you need to register them to a node just like you did as a reciever. Call <code>Node.create_subscription()</code> and give the same type of parameters as create_publisher. But you also need to give a 
+                         callback function that has one parameter which will get the message. The create_subscription() will register this to the node so that the spun executor can fetch the messages and call the function. <br>
+                         <br>
+                         <b>create a new node that contains a Pose publisher and reciever for the images</b>
+                         <code>
+                         <pre>
+from geometry_msgs.msg import Pose
+class recv(Node):
+    def __init__(self):
+        super().__init__('recv')
+        
+        self.subscription = self.create_subscription(
+            CompressedImage,
+            'camara',
+            self.on_recieve_images,
+            QoSPresetProfiles.DEFAULT,
+        )
+        self.pose_pub = self.create_publisher(
+            Pose
+            # you pick the other parameters
+        )
+        self.opencv_bridge = CvBridge()
+        
+        
+
+    def on_recieve_images(self, msg: CompressedImage):
+        image = self.opencv_bridge.compressed_imgmsg_to_cv2()
+        
+        # sample object detection
+        cv2.HoughCircles(
+            # sam
+        )
+        
+        response = Pose()
+        # A Quaternion rotation
+        response.pose.orientation.w = 1.0
+        
+        response.position.x = # please calculate a 
+        response.position.y = # safe place
+        response.position.z = # and set the robot speed to a minimum
+
+        self.pose_pub.publish(response)
+                         
+                         </pre>
+                         </code>
+
+                         <br>                 
+                         The executor is a first in first out scheduler which runs your callbacks. With the order of execution: <br>
+                         <img width="800" src="file://home/practicum/Downloads/executors_scheduling_semantics.png">
+                        
+                         You spin a executer like so:
+                         <code>
+                         <pre>
+        
+def main():
+    rclpy.init()
+    node = reciever()
+
+    rclpy.spin(node)
+
+    rclpy.shutdown()
+                        </pre>
+                        <code>
+""")
+        reciever.addWidget(browser4)
+
+
 
         slides = [
             introduction,
             package_layout,
-            publisher_previewer
+            publisher,
+            publisher_previewer,
+            reciever
         ]
         super().__init__(slides,parent=parent)
 

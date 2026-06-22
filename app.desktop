@@ -1,5 +1,0 @@
-[Desktop Entry]
-Name=tutorial
-Type=Application
-Exec=/home/practicum/gui_ws/start_app.sh
-Terminal=true
